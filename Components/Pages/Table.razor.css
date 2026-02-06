@@ -12,3 +12,12 @@
 .nested-grid-level-3 {
     background-color: #eef3f7;
 }
+
+.nested-table {
+    width: 100%;
+}
+
+.level2-host-row > td,
+.level3-host-row > td {
+    padding: 0 !important;
+}
