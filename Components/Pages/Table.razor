@@ -1,0 +1,41 @@
+@page "/table"
+
+<PageTitle>Table</PageTitle>
+
+<h1>Table</h1>
+
+<p>Sample table with static data.</p>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Active</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var row in Rows)
+        {
+            <tr>
+                <td>@row.Id</td>
+                <td>@row.Name</td>
+                <td>@row.Role</td>
+                <td>@(row.IsActive ? "Yes" : "No")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private static readonly IReadOnlyList<TableRow> Rows =
+    [
+        new(1, "Alex Johnson", "Admin", true),
+        new(2, "Sam Lee", "Editor", true),
+        new(3, "Taylor Brown", "Viewer", false),
+        new(4, "Jordan Smith", "Reviewer", true)
+    ];
+
+    private sealed record TableRow(int Id, string Name, string Role, bool IsActive);
+}
