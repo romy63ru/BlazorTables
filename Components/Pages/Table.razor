@@ -4,38 +4,88 @@
 
 <h1>Table</h1>
 
-<p>Sample table with static data.</p>
+<p>Sample data using Microsoft Blazor QuickGrid with expandable nested subtables.</p>
 
-<table class="table table-striped table-hover">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Role</th>
-            <th>Active</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var row in Rows)
+<QuickGrid Items="Rows" Class="table table-striped table-hover" Pagination="Pagination">
+    <TemplateColumn Title="">
+        <button class="btn btn-sm btn-outline-secondary expand-btn" @onclick="() => ToggleSubtable(context.Id)">
+            @(IsSubtableExpanded(context.Id) ? "-" : "+")
+        </button>
+    </TemplateColumn>
+    <PropertyColumn Property="row => row.Id" Title="ID" Sortable="true" />
+    <PropertyColumn Property="row => row.Name" Title="Name" Sortable="true" />
+    <PropertyColumn Property="row => row.Role" Title="Role" Sortable="true" />
+    <TemplateColumn Title="Active">
+        @(context.IsActive ? "Yes" : "No")
+    </TemplateColumn>
+    <TemplateColumn Title="Subtable">
+        @if (IsSubtableExpanded(context.Id))
         {
-            <tr>
-                <td>@row.Id</td>
-                <td>@row.Name</td>
-                <td>@row.Role</td>
-                <td>@(row.IsActive ? "Yes" : "No")</td>
-            </tr>
+            <QuickGrid Items="context.SubRows.AsQueryable()" Class="table table-sm mb-0 nested-grid">
+                <PropertyColumn Property="sub => sub.Component" Title="Component" />
+                <PropertyColumn Property="sub => sub.Status" Title="Status" />
+                <PropertyColumn Property="sub => sub.Owner" Title="Owner" />
+            </QuickGrid>
         }
-    </tbody>
-</table>
+    </TemplateColumn>
+</QuickGrid>
+
+<Paginator State="Pagination" />
 
 @code {
-    private static readonly IReadOnlyList<TableRow> Rows =
-    [
-        new(1, "Alex Johnson", "Admin", true),
-        new(2, "Sam Lee", "Editor", true),
-        new(3, "Taylor Brown", "Viewer", false),
-        new(4, "Jordan Smith", "Reviewer", true)
-    ];
+    private readonly PaginationState Pagination = new() { ItemsPerPage = 10 };
+    private readonly HashSet<int> expandedRows = [];
 
-    private sealed record TableRow(int Id, string Name, string Role, bool IsActive);
+    private static readonly IQueryable<TableRow> Rows = new List<TableRow>
+    {
+        new(
+            1,
+            "Alex Johnson",
+            "Admin",
+            true,
+            [
+                new("Auth", "Healthy", "Alex"),
+                new("Billing", "Warning", "Jordan")
+            ]),
+        new(
+            2,
+            "Sam Lee",
+            "Editor",
+            true,
+            [
+                new("CMS", "Healthy", "Sam"),
+                new("Search", "Healthy", "Taylor")
+            ]),
+        new(
+            3,
+            "Taylor Brown",
+            "Viewer",
+            false,
+            [
+                new("Reports", "Offline", "Taylor")
+            ]),
+        new(
+            4,
+            "Jordan Smith",
+            "Reviewer",
+            true,
+            [
+                new("Approvals", "Healthy", "Jordan"),
+                new("Audit", "Healthy", "Alex")
+            ])
+    }.AsQueryable();
+
+    private void ToggleSubtable(int rowId)
+    {
+        if (!expandedRows.Add(rowId))
+        {
+            expandedRows.Remove(rowId);
+        }
+    }
+
+    private bool IsSubtableExpanded(int rowId) => expandedRows.Contains(rowId);
+
+    private sealed record TableRow(int Id, string Name, string Role, bool IsActive, IReadOnlyList<TableSubRow> SubRows);
+
+    private sealed record TableSubRow(string Component, string Status, string Owner);
 }

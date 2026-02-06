@@ -1,0 +1,10 @@
+.expand-btn {
+    min-width: 2rem;
+    padding: 0.05rem 0.45rem;
+    line-height: 1.1;
+}
+
+.nested-grid {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
