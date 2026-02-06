@@ -2,6 +2,14 @@
 
 Blazor Server sample focused on multi-level nested tables, shared generated data, and D3 visualization.
 
+## Quick Links
+
+- Repository: [BlazorTables](https://github.com/romy63ru/BlazorTables)
+- Local Table page: [http://localhost:5088/table](http://localhost:5088/table)
+- Local Sunburst page: [http://localhost:5088/sunburst](http://localhost:5088/sunburst)
+- Local Scatter Matrix page: [http://localhost:5088/scatter-matrix](http://localhost:5088/scatter-matrix)
+- Benchmark report: [`tests/results/nested-table-speed-10-approaches.md`](tests/results/nested-table-speed-10-approaches.md)
+
 ## Current Project Goals
 
 - Provide a stable 3-level nested table experience:
@@ -16,13 +24,14 @@ Blazor Server sample focused on multi-level nested tables, shared generated data
 - Reuse one Blazor-side data source across:
   - the nested table page
   - the D3 Sunburst page
+  - the D3 brushable scatterplot matrix page
 - Track interaction speed with automated browser tests and benchmark reporting.
 
 ## Tech Stack
 
 - .NET 10 Blazor Server
 - Razor components
-- D3.js for Sunburst visualization
+- D3.js for Sunburst and brushable scatterplot matrix visualizations
 - Playwright (Node.js) for end-to-end timing tests
 
 ## Rendering Mode
@@ -44,6 +53,7 @@ This keeps page data in one place and avoids duplicated generation logic.
 
 - `/table`: 3-level nested table with expand/collapse and generated 100x100 child/detail rows
 - `/sunburst`: interactive D3 Sunburst sourced from Blazor-side generated data
+- `/scatter-matrix`: brushable D3 scatterplot matrix sourced from Blazor-side generated data
 
 ## Run the App
 
@@ -67,6 +77,7 @@ Open:
 
 - `http://localhost:5088/table`
 - `http://localhost:5088/sunburst`
+- `http://localhost:5088/scatter-matrix`
 
 ## Test and Benchmark
 
@@ -100,6 +111,16 @@ Report output:
 
 - `tests/results/nested-table-speed-10-approaches.md`
 
+### 5) Run page render-speed test
+
+```bash
+npm run test:e2e:render-speed
+```
+
+Spec file:
+
+- `tests/render-speed.spec.js`
+
 ## D3 Sunburst Notes
 
 The Sunburst diagram supports:
@@ -109,6 +130,16 @@ The Sunburst diagram supports:
 - center click to reset zoom
 
 Data for the diagram is sent from Blazor (`Sunburst.razor`) through JS interop to D3 (`wwwroot/js/earth-sunburst.js`).
+
+## D3 Scatter Matrix Notes
+
+The scatter matrix supports:
+
+- multidimensional scatter cells
+- per-cell brush selection
+- cross-cell point highlighting
+
+Data for the diagram is sent from Blazor (`ScatterMatrix.razor`) through JS interop to D3 (`wwwroot/js/brushable-scatter-matrix.js`).
 
 ## Notes
 

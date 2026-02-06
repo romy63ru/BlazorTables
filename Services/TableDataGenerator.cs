@@ -1,4 +1,5 @@
 using BlazorTables.Models;
+using System.Globalization;
 
 namespace BlazorTables.Services;
 
@@ -9,6 +10,7 @@ public sealed class TableDataGenerator
     private static readonly string[] Owners = ["Alex", "Sam", "Taylor", "Jordan"];
 
     private readonly IReadOnlyList<TableRow> rows;
+    private IReadOnlyList<ScatterMatrixPoint>? scatterMatrixData;
 
     public TableDataGenerator()
     {
@@ -86,6 +88,70 @@ public sealed class TableDataGenerator
         return new SunburstNode("Generated Table Data", Children: roleNodes);
     }
 
+    public IReadOnlyList<ScatterMatrixPoint> GetScatterMatrixData()
+    {
+        if (scatterMatrixData is not null)
+        {
+            return scatterMatrixData;
+        }
+
+        var points = new List<ScatterMatrixPoint>(rows.Count);
+
+        foreach (var row in rows)
+        {
+            var healthyCount = 0;
+            var warningCount = 0;
+            var offlineCount = 0;
+            var detailSum = 0.0;
+            var detailCount = 0;
+            var highDetailCount = 0;
+
+            foreach (var subRow in GetSubRows(row.Id))
+            {
+                switch (subRow.Status)
+                {
+                    case "Healthy":
+                        healthyCount++;
+                        break;
+                    case "Warning":
+                        warningCount++;
+                        break;
+                    default:
+                        offlineCount++;
+                        break;
+                }
+
+                foreach (var detail in GetDetailRows(row.Id, subRow.Id))
+                {
+                    var value = ParsePercentValue(detail.Value);
+                    detailSum += value;
+                    detailCount++;
+
+                    if (value >= 80)
+                    {
+                        highDetailCount++;
+                    }
+                }
+            }
+
+            var avgDetailValue = detailCount == 0 ? 0 : detailSum / detailCount;
+            var highDetailRate = detailCount == 0 ? 0 : (100.0 * highDetailCount) / detailCount;
+
+            points.Add(new ScatterMatrixPoint(
+                row.Id,
+                row.Role,
+                row.IsActive,
+                healthyCount,
+                warningCount,
+                offlineCount,
+                avgDetailValue,
+                highDetailRate));
+        }
+
+        scatterMatrixData = points;
+        return scatterMatrixData;
+    }
+
     private static IReadOnlyList<TableRow> GenerateRows()
     {
         return Enumerable.Range(1, 100)
@@ -95,5 +161,15 @@ public sealed class TableDataGenerator
                 Roles[(id - 1) % Roles.Length],
                 id % 2 == 0))
             .ToList();
+    }
+
+    private static double ParsePercentValue(string text)
+    {
+        if (double.TryParse(text.TrimEnd('%'), NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+        {
+            return value;
+        }
+
+        return 0;
     }
 }

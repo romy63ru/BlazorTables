@@ -1,0 +1,42 @@
+.scatter-matrix-panel {
+    padding: 0.75rem;
+    border: 1px solid #d0d7de;
+    border-radius: 0.75rem;
+    background: linear-gradient(180deg, #f6fbff 0%, #edf6ff 100%);
+}
+
+.scatter-matrix-chart {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.scatter-matrix-chart .matrix-info {
+    margin-bottom: 0.65rem;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #d0d7de;
+    border-radius: 0.4rem;
+    background: #ffffff;
+    color: #334155;
+    font-size: 0.9rem;
+}
+
+.scatter-matrix-chart .matrix-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 0.9rem;
+    margin-top: 0.65rem;
+    font-size: 0.87rem;
+}
+
+.scatter-matrix-chart .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.scatter-matrix-chart .legend-swatch {
+    width: 0.78rem;
+    height: 0.78rem;
+    border: 1px solid #8ea0b2;
+    border-radius: 999px;
+}
