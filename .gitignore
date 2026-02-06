@@ -13,6 +13,7 @@ obj/
 
 # Local run temp created during troubleshooting
 .tmp-home/
+.aspnet/
 
 # OS files
 .DS_Store
