@@ -9,6 +9,7 @@ Blazor Server sample focused on multi-level nested tables, shared generated data
 - Local Sunburst page: [http://localhost:5088/sunburst](http://localhost:5088/sunburst)
 - Local Scatter Matrix page: [http://localhost:5088/scatter-matrix](http://localhost:5088/scatter-matrix)
 - Benchmark report: [`tests/results/nested-table-speed-10-approaches.md`](tests/results/nested-table-speed-10-approaches.md)
+- Graphics benchmark report: [`tests/results/graphics-render-benchmark.md`](tests/results/graphics-render-benchmark.md)
 
 ## Current Project Goals
 
@@ -120,6 +121,21 @@ npm run test:e2e:render-speed
 Spec file:
 
 - `tests/render-speed.spec.js`
+
+### 6) Run graphics benchmark (D3 rendering)
+
+```bash
+npm run benchmark:graphics
+```
+
+Runner file:
+
+- `tests/run-graphics-benchmark.js`
+
+Report output:
+
+- `tests/results/graphics-render-benchmark.md`
+- `tests/results/graphics-render-benchmark.json`
 
 ## D3 Sunburst Notes
 
