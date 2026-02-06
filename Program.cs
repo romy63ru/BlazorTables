@@ -1,4 +1,5 @@
 using BlazorTables.Components;
+using BlazorTables.Services;
 using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,7 @@ Directory.CreateDirectory(dataProtectionKeyPath);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddSingleton<TableDataGenerator>();
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeyPath))
     .SetApplicationName("BlazorTables");

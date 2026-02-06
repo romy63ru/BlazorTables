@@ -1,6 +1,6 @@
 # BlazorTables
 
-Blazor Server sample focused on multi-level nested tables with measurable expand/collapse performance.
+Blazor Server sample focused on multi-level nested tables, shared generated data, and D3 visualization.
 
 ## Current Project Goals
 
@@ -13,13 +13,37 @@ Blazor Server sample focused on multi-level nested tables with measurable expand
   - 100 parent rows
   - 100 child rows per parent
   - 100 detail rows per child
+- Reuse one Blazor-side data source across:
+  - the nested table page
+  - the D3 Sunburst page
 - Track interaction speed with automated browser tests and benchmark reporting.
 
 ## Tech Stack
 
 - .NET 10 Blazor Server
 - Razor components
+- D3.js for Sunburst visualization
 - Playwright (Node.js) for end-to-end timing tests
+
+## Rendering Mode
+
+- Interactive Server rendering (Blazor Server circuit over SignalR)
+- Initial UI is rendered as HTML
+- Component interactivity runs on the server (not WebAssembly in the browser)
+
+## Data Model and Generation
+
+Shared generator and models are used by both the table and diagram:
+
+- Service: `Services/TableDataGenerator.cs`
+- Models: `Models/NestedTableModels.cs`
+
+This keeps page data in one place and avoids duplicated generation logic.
+
+## Pages
+
+- `/table`: 3-level nested table with expand/collapse and generated 100x100 child/detail rows
+- `/sunburst`: interactive D3 Sunburst sourced from Blazor-side generated data
 
 ## Run the App
 
@@ -38,6 +62,11 @@ Alternative launcher script:
 ```bash
 ./run-site.ps1
 ```
+
+Open:
+
+- `http://localhost:5088/table`
+- `http://localhost:5088/sunburst`
 
 ## Test and Benchmark
 
@@ -70,6 +99,16 @@ npm run benchmark:approaches
 Report output:
 
 - `tests/results/nested-table-speed-10-approaches.md`
+
+## D3 Sunburst Notes
+
+The Sunburst diagram supports:
+
+- hover details
+- click-to-zoom on arcs
+- center click to reset zoom
+
+Data for the diagram is sent from Blazor (`Sunburst.razor`) through JS interop to D3 (`wwwroot/js/earth-sunburst.js`).
 
 ## Notes
 

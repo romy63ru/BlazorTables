@@ -1,4 +1,5 @@
 @page "/table"
+@inject TableDataGenerator DataGenerator
 
 <PageTitle>Table</PageTitle>
 
@@ -106,33 +107,18 @@
 @code {
     private int? expandedParentId;
     private ChildRowKey? expandedChildKey;
-    private static readonly string[] Roles = ["Admin", "Editor", "Viewer", "Reviewer"];
-    private static readonly string[] Statuses = ["Healthy", "Warning", "Offline"];
-    private static readonly string[] Owners = ["Alex", "Sam", "Taylor", "Jordan"];
+    private IReadOnlyList<TableRow> Rows = [];
 
-    private static readonly IReadOnlyList<TableRow> Rows = Enumerable.Range(1, 100)
-        .Select(id => new TableRow(
-            id,
-            $"User {id:000}",
-            Roles[(id - 1) % Roles.Length],
-            id % 2 == 0))
-        .ToList();
+    protected override void OnInitialized()
+    {
+        Rows = DataGenerator.GetRows();
+    }
 
     private IEnumerable<TableSubRow> GetSubRows(int parentId) =>
-        Enumerable.Range(1, 100)
-            .Select(id => new TableSubRow(
-                id,
-                $"P{parentId:000}-Component-{id:000}",
-                Statuses[(parentId + id) % Statuses.Length],
-                Owners[(id - 1) % Owners.Length]));
+        DataGenerator.GetSubRows(parentId);
 
     private IEnumerable<TableDetailRow> GetDetailRows(int parentId, int childId) =>
-        Enumerable.Range(1, 100)
-            .Select(id => new TableDetailRow(
-                id,
-                $"P{parentId:000}-C{childId:000}-Metric-{id:000}",
-                $"{((parentId * childId * id) % 100) + 1}%",
-                Owners[(parentId + childId + id) % Owners.Length]));
+        DataGenerator.GetDetailRows(parentId, childId);
 
     private void ToggleParentTable(int rowId)
     {
@@ -150,10 +136,4 @@
     private bool IsChildExpanded(int parentId, int childId) => expandedChildKey == new ChildRowKey(parentId, childId);
 
     private sealed record ChildRowKey(int ParentId, int ChildId);
-
-    private sealed record TableRow(int Id, string Name, string Role, bool IsActive);
-
-    private sealed record TableSubRow(int Id, string Component, string Status, string Owner);
-
-    private sealed record TableDetailRow(int Id, string Metric, string Value, string UpdatedBy);
 }

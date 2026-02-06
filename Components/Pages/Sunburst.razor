@@ -1,0 +1,57 @@
+@page "/sunburst"
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inject TableDataGenerator DataGenerator
+
+<PageTitle>Sunburst</PageTitle>
+
+<h1>Sunburst (Generated Table Data)</h1>
+
+<p>D3 Sunburst sourced from the same Blazor C# data generator used by the nested table. Hover arcs for values, click arcs to zoom, and click the center to reset.</p>
+
+<div class="sunburst-panel">
+    <div id="earth-sunburst-chart" class="sunburst-chart" aria-label="Generated table data sunburst chart"></div>
+</div>
+
+@code {
+    private const string ChartSelector = "#earth-sunburst-chart";
+    private bool initialized;
+    private SunburstNode chartData = new("Generated Table Data");
+
+    protected override void OnInitialized()
+    {
+        chartData = DataGenerator.GetSunburstData();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || initialized)
+        {
+            return;
+        }
+
+        initialized = true;
+        await JS.InvokeVoidAsync("earthSunburst.render", ChartSelector, chartData);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (!initialized)
+        {
+            return;
+        }
+
+        try
+        {
+            await JS.InvokeVoidAsync("earthSunburst.dispose", ChartSelector);
+        }
+        catch (JSDisconnectedException)
+        {
+            // Ignore disconnects when navigating away or shutting down.
+        }
+        catch (InvalidOperationException)
+        {
+            // Ignore static-render disposal where JS interop is unavailable.
+        }
+    }
+}
