@@ -2,6 +2,14 @@
 bin/
 obj/
 
+# Package manager artifacts
+node_modules/
+
+# Test and automation artifacts
+TestResults/
+test-results/
+playwright-report/
+
 # User-specific files
 *.user
 *.suo
@@ -11,7 +19,7 @@ obj/
 .vscode/
 .idea/
 
-# Local run temp created during troubleshooting
+# Local run temp/state
 .tmp-home/
 .aspnet/
 
