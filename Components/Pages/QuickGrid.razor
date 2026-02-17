@@ -1,0 +1,131 @@
+@page "/quickgrid-demo"
+@inject TableDataGenerator DataGenerator
+
+<PageTitle>QuickGrid Nested</PageTitle>
+
+<h1>QuickGrid Nested</h1>
+
+<p>Three-level nested tables using QuickGrid with TemplateColumn - 100 generated rows per nested level.</p>
+
+<style>
+    .quickgrid-nested .nested-row {
+        background-color: #f8f9fa;
+    }
+    
+    .quickgrid-nested td {
+        vertical-align: top;
+    }
+    
+    .expand-cell {
+        width: 50px;
+        text-align: center;
+    }
+    
+    .quickgrid-nested tbody tr {
+        position: relative;
+    }
+    
+    .quickgrid-nested tbody tr td:last-child {
+        overflow: visible;
+        position: static;
+    }
+</style>
+
+<div class="quickgrid-nested">
+    <Microsoft.AspNetCore.Components.QuickGrid.QuickGrid Items="@FilteredRows" Pagination="@pagination" Class="table table-striped">
+        <TemplateColumn Title="" Class="expand-cell">
+            <button class="btn btn-sm btn-outline-secondary"
+                    @onclick="() => ToggleParentTable(context.Id)"
+                    @onclick:stopPropagation="true">
+                @(IsParentExpanded(context.Id) ? "−" : "+")
+            </button>
+        </TemplateColumn>
+        <PropertyColumn Property="@(r => r.Id)" Sortable="true" Title="ID" />
+        <PropertyColumn Property="@(r => r.Name)" Sortable="true" />
+        <PropertyColumn Property="@(r => r.Role)" Sortable="true" />
+        <TemplateColumn Title="Active" Sortable="true" SortBy="@(GridSort<TableRow>.ByAscending(r => r.IsActive))">
+            @(context.IsActive ? "Yes" : "No")
+        </TemplateColumn>
+        <TemplateColumn Title="">
+            @if (IsParentExpanded(context.Id))
+            {
+                var parentId = context.Id;
+                <div style="position: absolute; left: 15px; right: 0; width: calc(100vw - 300px); z-index: 10;">
+                    <div style="padding: 0.5rem; background: #f8f9fa; border-radius: 4px; margin: 0.5rem 0;">
+                        <strong>Sub-rows for @context.Name:</strong>
+                        <div class="mt-2">
+                            <Microsoft.AspNetCore.Components.QuickGrid.QuickGrid Items="@GetSubRows(parentId).AsQueryable()" Class="table table-sm table-bordered bg-white">
+                                <TemplateColumn Title="" Class="expand-cell">
+                                    <button class="btn btn-sm btn-outline-secondary"
+                                            @onclick="() => ToggleChildTable(parentId, context.Id)"
+                                            @onclick:stopPropagation="true">
+                                        @(IsChildExpanded(parentId, context.Id) ? "−" : "+")
+                                    </button>
+                                </TemplateColumn>
+                                <PropertyColumn Property="@(s => s.Id)" Sortable="true" Title="Sub ID" />
+                                <PropertyColumn Property="@(s => s.Component)" Sortable="true" />
+                                <PropertyColumn Property="@(s => s.Status)" Sortable="true" />
+                                <PropertyColumn Property="@(s => s.Owner)" Sortable="true" />
+                                <TemplateColumn Title="">
+                                    @if (IsChildExpanded(parentId, context.Id))
+                                    {
+                                        var subRowId = context.Id;
+                                        var componentName = context.Component;
+                                        <div style="padding-left: 15px; padding-top: 0.5rem; padding-bottom: 0.5rem; background: #e9ecef;">
+                                            <strong>Details for @componentName:</strong>
+                                            <div class="mt-2">
+                                                <Microsoft.AspNetCore.Components.QuickGrid.QuickGrid Items="@GetDetailRows(parentId, subRowId).AsQueryable()" Class="table table-sm table-bordered bg-white">
+                                                    <PropertyColumn Property="@(d => d.Id)" Sortable="true" Title="Detail ID" />
+                                                    <PropertyColumn Property="@(d => d.Metric)" Sortable="true" />
+                                                    <PropertyColumn Property="@(d => d.Value)" Sortable="true" />
+                                                    <PropertyColumn Property="@(d => d.UpdatedBy)" Sortable="true" Title="Updated By" />
+                                                </Microsoft.AspNetCore.Components.QuickGrid.QuickGrid>
+                                            </div>
+                                        </div>
+                                    }
+                                </TemplateColumn>
+                            </Microsoft.AspNetCore.Components.QuickGrid.QuickGrid>
+                        </div>
+                    </div>
+                </div>
+            }
+        </TemplateColumn>
+    </Microsoft.AspNetCore.Components.QuickGrid.QuickGrid>
+
+    <Paginator State="@pagination" />
+</div>
+
+@code {
+    private IQueryable<TableRow> FilteredRows = Enumerable.Empty<TableRow>().AsQueryable();
+    private PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+    private int? expandedParentId;
+    private ChildRowKey? expandedChildKey;
+
+    protected override void OnInitialized()
+    {
+        FilteredRows = DataGenerator.GetRows().AsQueryable();
+    }
+
+    private IEnumerable<TableSubRow> GetSubRows(int parentId) =>
+        DataGenerator.GetSubRows(parentId);
+
+    private IEnumerable<TableDetailRow> GetDetailRows(int parentId, int childId) =>
+        DataGenerator.GetDetailRows(parentId, childId);
+
+    private void ToggleParentTable(int rowId)
+    {
+        expandedParentId = expandedParentId == rowId ? null : rowId;
+        expandedChildKey = null;
+    }
+
+    private void ToggleChildTable(int parentId, int childId)
+    {
+        var key = new ChildRowKey(parentId, childId);
+        expandedChildKey = expandedChildKey == key ? null : key;
+    }
+
+    private bool IsParentExpanded(int rowId) => expandedParentId == rowId;
+    private bool IsChildExpanded(int parentId, int childId) => expandedChildKey == new ChildRowKey(parentId, childId);
+
+    private sealed record ChildRowKey(int ParentId, int ChildId);
+}
