@@ -172,13 +172,15 @@
 
         const legend = d3.select(host).append("div").attr("class", "sunburst-legend");
         const layerValues = root.children || [];
+        const totalValue = root.value || 0;
 
         layerValues.forEach((layer) => {
             const row = legend.append("div").attr("class", "legend-item");
             row.append("span")
                 .attr("class", "legend-swatch")
                 .style("background-color", color(layer.data.name));
-            row.append("span").text(`${layer.data.name}: ${(layer.value || 0).toFixed(2)}%`);
+            const share = totalValue > 0 ? ((layer.value || 0) / totalValue) * 100 : 0;
+            row.append("span").text(`${layer.data.name}: ${share.toFixed(2)}%`);
         });
 
         function clicked(focusNode) {

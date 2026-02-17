@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { chromium } = require("playwright");
+const { withWebServer } = require("./with-web-server");
 
 const BASE_URL = process.env.BASE_URL ?? "http://127.0.0.1:5088";
 const SAMPLES = Number(process.env.GRAPHICS_BENCH_SAMPLES ?? 5);
@@ -118,7 +119,7 @@ function toMarkdown(summary, status) {
   return lines.join("\n");
 }
 
-async function main() {
+async function runBenchmark() {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
 
@@ -182,6 +183,16 @@ async function main() {
   if (status !== "PASS") {
     process.exitCode = 1;
   }
+}
+
+async function main() {
+  await withWebServer(
+    {
+      baseUrl: BASE_URL,
+      healthPath: "/table"
+    },
+    runBenchmark
+  );
 }
 
 main().catch((error) => {

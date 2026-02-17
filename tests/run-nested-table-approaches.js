@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { chromium } = require("playwright");
+const { withWebServer } = require("./with-web-server");
 
 const BASE_URL = process.env.BASE_URL ?? "http://127.0.0.1:5088";
 const SAMPLES_PER_APPROACH = Number(process.env.SAMPLES_PER_APPROACH ?? 3);
@@ -222,7 +223,7 @@ function toMarkdown(results) {
   return lines.join("\n");
 }
 
-async function main() {
+async function runBenchmark() {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
   const results = [];
@@ -246,6 +247,16 @@ async function main() {
   fs.writeFileSync(outputPath, markdown, "utf8");
 
   console.log(`Saved report: ${outputPath}`);
+}
+
+async function main() {
+  await withWebServer(
+    {
+      baseUrl: BASE_URL,
+      healthPath: "/table"
+    },
+    runBenchmark
+  );
 }
 
 main().catch((error) => {
