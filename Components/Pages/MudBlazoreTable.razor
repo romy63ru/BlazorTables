@@ -7,18 +7,29 @@
 
 <p>Three-level hierarchical MudBlazor DataGrid with the same generated data.</p>
 
+<MudBlazor.MudStack Row="true" AlignItems="MudBlazor.AlignItems.Center" Spacing="2" style="margin-bottom: 12px;">
+    <MudBlazor.MudText Typo="MudBlazor.Typo.body2">Filter status:</MudBlazor.MudText>
+    <MudBlazor.MudSelect T="string" Value="@SelectedStatus" ValueChanged="OnSelectedStatusChanged" Dense="true" Variant="MudBlazor.Variant.Outlined" style="min-width: 180px;">
+        @foreach (var statusOption in StatusFilterOptions)
+        {
+            <MudBlazor.MudSelectItem T="string" Value="@statusOption">@statusOption</MudBlazor.MudSelectItem>
+        }
+    </MudBlazor.MudSelect>
+</MudBlazor.MudStack>
+
 <MudBlazor.MudDataGrid T="TableRow"
                         Items="@Rows"
+                        SortMode="MudBlazor.SortMode.Multiple"
                         Dense="true"
                         Hover="true"
                         Striped="true"
                         Bordered="true">
     <Columns>
         <MudBlazor.HierarchyColumn T="TableRow" />
-        <MudBlazor.PropertyColumn T="TableRow" TProperty="int" Property="x => x.Id" Title="ID" />
-        <MudBlazor.PropertyColumn T="TableRow" TProperty="string" Property="x => x.Name" Title="Name" />
-        <MudBlazor.PropertyColumn T="TableRow" TProperty="string" Property="x => x.Role" Title="Role" />
-        <MudBlazor.TemplateColumn T="TableRow" Title="Active">
+        <MudBlazor.PropertyColumn T="TableRow" TProperty="int" Property="x => x.Id" Title="ID" Sortable="true" />
+        <MudBlazor.PropertyColumn T="TableRow" TProperty="string" Property="x => x.Name" Title="Name" Sortable="true" />
+        <MudBlazor.PropertyColumn T="TableRow" TProperty="string" Property="x => x.Role" Title="Role" Sortable="true" />
+        <MudBlazor.TemplateColumn T="TableRow" Title="Active" Sortable="true" SortBy="x => x.IsActive">
             <CellTemplate>
                 @(context.Item.IsActive ? "Yes" : "No")
             </CellTemplate>
@@ -28,32 +39,34 @@
         <div style="margin-left: 15px; padding: 8px 0;">
             <MudBlazor.MudText Typo="MudBlazor.Typo.subtitle1">Sub-rows for @parentContext.Item.Name</MudBlazor.MudText>
             <MudBlazor.MudDataGrid T="TableSubRow"
-                                    Items="@GetSubRows(parentContext.Item.Id)"
+                                    Items="@GetFilteredSubRows(parentContext.Item.Id)"
+                                    SortMode="MudBlazor.SortMode.Multiple"
                                     Dense="true"
                                     Hover="true"
                                     Bordered="true"
                                     Striped="true">
                 <Columns>
                     <MudBlazor.HierarchyColumn T="TableSubRow" />
-                    <MudBlazor.PropertyColumn T="TableSubRow" TProperty="int" Property="x => x.Id" Title="Sub ID" />
-                    <MudBlazor.PropertyColumn T="TableSubRow" TProperty="string" Property="x => x.Component" Title="Component" />
-                    <MudBlazor.PropertyColumn T="TableSubRow" TProperty="string" Property="x => x.Status" Title="Status" />
-                    <MudBlazor.PropertyColumn T="TableSubRow" TProperty="string" Property="x => x.Owner" Title="Owner" />
+                    <MudBlazor.PropertyColumn T="TableSubRow" TProperty="int" Property="x => x.Id" Title="Sub ID" Sortable="true" />
+                    <MudBlazor.PropertyColumn T="TableSubRow" TProperty="string" Property="x => x.Component" Title="Component" Sortable="true" />
+                    <MudBlazor.PropertyColumn T="TableSubRow" TProperty="string" Property="x => x.Status" Title="Status" Sortable="true" />
+                    <MudBlazor.PropertyColumn T="TableSubRow" TProperty="string" Property="x => x.Owner" Title="Owner" Sortable="true" />
                 </Columns>
                 <ChildRowContent Context="childContext">
                     <div style="margin-left: 15px; padding: 8px 0;">
                         <MudBlazor.MudText Typo="MudBlazor.Typo.subtitle2">Details for @childContext.Item.Component</MudBlazor.MudText>
                         <MudBlazor.MudDataGrid T="TableDetailRow"
                                                 Items="@GetDetailRows(parentContext.Item.Id, childContext.Item.Id)"
+                                                SortMode="MudBlazor.SortMode.Multiple"
                                                 Dense="true"
                                                 Hover="true"
                                                 Bordered="true"
                                                 Striped="true">
                             <Columns>
-                                <MudBlazor.PropertyColumn T="TableDetailRow" TProperty="int" Property="x => x.Id" Title="Detail ID" />
-                                <MudBlazor.PropertyColumn T="TableDetailRow" TProperty="string" Property="x => x.Metric" Title="Metric" />
-                                <MudBlazor.PropertyColumn T="TableDetailRow" TProperty="string" Property="x => x.Value" Title="Value" />
-                                <MudBlazor.PropertyColumn T="TableDetailRow" TProperty="string" Property="x => x.UpdatedBy" Title="Updated By" />
+                                <MudBlazor.PropertyColumn T="TableDetailRow" TProperty="int" Property="x => x.Id" Title="Detail ID" Sortable="true" />
+                                <MudBlazor.PropertyColumn T="TableDetailRow" TProperty="string" Property="x => x.Metric" Title="Metric" Sortable="true" />
+                                <MudBlazor.PropertyColumn T="TableDetailRow" TProperty="string" Property="x => x.Value" Title="Value" Sortable="true" />
+                                <MudBlazor.PropertyColumn T="TableDetailRow" TProperty="string" Property="x => x.UpdatedBy" Title="Updated By" Sortable="true" />
                             </Columns>
                         </MudBlazor.MudDataGrid>
                     </div>
@@ -64,7 +77,10 @@
 </MudBlazor.MudDataGrid>
 
 @code {
+    private static readonly IReadOnlyList<string> StatusFilterOptions = ["All", "Healthy", "Warning", "Offline"];
+
     private IReadOnlyList<TableRow> Rows = [];
+    private string SelectedStatus = "All";
 
     protected override void OnInitialized()
     {
@@ -74,6 +90,23 @@
     private IEnumerable<TableSubRow> GetSubRows(int parentId) =>
         DataGenerator.GetSubRows(parentId);
 
+    private IEnumerable<TableSubRow> GetFilteredSubRows(int parentId)
+    {
+        var subRows = GetSubRows(parentId);
+
+        if (SelectedStatus == "All")
+        {
+            return subRows;
+        }
+
+        return subRows.Where(subRow => subRow.Status == SelectedStatus);
+    }
+
     private IEnumerable<TableDetailRow> GetDetailRows(int parentId, int childId) =>
         DataGenerator.GetDetailRows(parentId, childId);
+
+    private void OnSelectedStatusChanged(string value)
+    {
+        SelectedStatus = value;
+    }
 }
