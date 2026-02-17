@@ -1,10 +1,19 @@
 using BlazorTables.Components;
+using BlazorTables.Services;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
+var dataProtectionKeyPath = Path.Combine(builder.Environment.ContentRootPath, ".aspnet", "DataProtection-Keys");
+
+Directory.CreateDirectory(dataProtectionKeyPath);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddSingleton<TableDataGenerator>();
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeyPath))
+    .SetApplicationName("BlazorTables");
 
 var app = builder.Build();
 

@@ -23,8 +23,10 @@ playwright-report/
 .tmp-home/
 .aspnet/
 
-# Logs
-*.log
+# Node / Playwright
+node_modules/
+playwright-report/
+test-results/
 
 # OS files
 .DS_Store

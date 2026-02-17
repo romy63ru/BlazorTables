@@ -1,14 +1,16 @@
 @page "/table"
+@inject TableDataGenerator DataGenerator
 
 <PageTitle>Table</PageTitle>
 
 <h1>Table</h1>
 
-<p>Sample table with static data.</p>
+<p>Three-level QuickGrid table with 100 generated rows per nested level.</p>
 
-<table class="table table-striped table-hover">
+<table class="table table-striped table-hover mb-0" data-testid="level1-table">
     <thead>
         <tr>
+            <th></th>
             <th>ID</th>
             <th>Name</th>
             <th>Role</th>
@@ -18,24 +20,120 @@
     <tbody>
         @foreach (var row in Rows)
         {
-            <tr>
+            <tr data-testid="@($"level1-row-{row.Id}")">
+                <td>
+                    <button class="btn btn-sm btn-outline-secondary expand-btn"
+                            data-testid="@($"level1-toggle-{row.Id}")"
+                            @onclick="() => ToggleParentTable(row.Id)">
+                        @(IsParentExpanded(row.Id) ? "-" : "+")
+                    </button>
+                </td>
                 <td>@row.Id</td>
                 <td>@row.Name</td>
                 <td>@row.Role</td>
                 <td>@(row.IsActive ? "Yes" : "No")</td>
             </tr>
+
+            @if (IsParentExpanded(row.Id))
+            {
+                <tr class="level2-host-row" data-testid="@($"level2-host-{row.Id}")">
+                    <td colspan="5">
+                        <table class="table table-sm mb-0 nested-grid nested-table" data-testid="@($"level2-table-{row.Id}")">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Sub ID</th>
+                                    <th>Component</th>
+                                    <th>Status</th>
+                                    <th>Owner</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var subRow in GetSubRows(row.Id))
+                                {
+                                    <tr data-testid="@($"level2-row-{row.Id}-{subRow.Id}")">
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-secondary expand-btn"
+                                                    data-testid="@($"level2-toggle-{row.Id}-{subRow.Id}")"
+                                                    @onclick="() => ToggleChildTable(row.Id, subRow.Id)">
+                                                @(IsChildExpanded(row.Id, subRow.Id) ? "-" : "+")
+                                            </button>
+                                        </td>
+                                        <td>@subRow.Id</td>
+                                        <td>@subRow.Component</td>
+                                        <td>@subRow.Status</td>
+                                        <td>@subRow.Owner</td>
+                                    </tr>
+
+                                    @if (IsChildExpanded(row.Id, subRow.Id))
+                                    {
+                                        <tr class="level3-host-row" data-testid="@($"level3-host-{row.Id}-{subRow.Id}")">
+                                            <td colspan="5">
+                                                <table class="table table-sm mb-0 nested-grid nested-grid-level-3 nested-table"
+                                                       data-testid="@($"level3-table-{row.Id}-{subRow.Id}")">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Detail ID</th>
+                                                            <th>Metric</th>
+                                                            <th>Value</th>
+                                                            <th>Updated By</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var detail in GetDetailRows(row.Id, subRow.Id))
+                                                        {
+                                                            <tr>
+                                                                <td>@detail.Id</td>
+                                                                <td>@detail.Metric</td>
+                                                                <td>@detail.Value</td>
+                                                                <td>@detail.UpdatedBy</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            }
         }
     </tbody>
 </table>
 
 @code {
-    private static readonly IReadOnlyList<TableRow> Rows =
-    [
-        new(1, "Alex Johnson", "Admin", true),
-        new(2, "Sam Lee", "Editor", true),
-        new(3, "Taylor Brown", "Viewer", false),
-        new(4, "Jordan Smith", "Reviewer", true)
-    ];
+    private int? expandedParentId;
+    private ChildRowKey? expandedChildKey;
+    private IReadOnlyList<TableRow> Rows = [];
 
-    private sealed record TableRow(int Id, string Name, string Role, bool IsActive);
+    protected override void OnInitialized()
+    {
+        Rows = DataGenerator.GetRows();
+    }
+
+    private IEnumerable<TableSubRow> GetSubRows(int parentId) =>
+        DataGenerator.GetSubRows(parentId);
+
+    private IEnumerable<TableDetailRow> GetDetailRows(int parentId, int childId) =>
+        DataGenerator.GetDetailRows(parentId, childId);
+
+    private void ToggleParentTable(int rowId)
+    {
+        expandedParentId = expandedParentId == rowId ? null : rowId;
+        expandedChildKey = null;
+    }
+
+    private void ToggleChildTable(int parentId, int childId)
+    {
+        var key = new ChildRowKey(parentId, childId);
+        expandedChildKey = expandedChildKey == key ? null : key;
+    }
+
+    private bool IsParentExpanded(int rowId) => expandedParentId == rowId;
+    private bool IsChildExpanded(int parentId, int childId) => expandedChildKey == new ChildRowKey(parentId, childId);
+
+    private sealed record ChildRowKey(int ParentId, int ChildId);
 }

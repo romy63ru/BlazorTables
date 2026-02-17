@@ -1,0 +1,39 @@
+{
+  "thresholdsMs": {
+    "sunburstFirstPaintMax": 4000,
+    "sunburstReadyMax": 6000,
+    "scatterFirstPaintMax": 5000,
+    "scatterReadyMax": 7000
+  },
+  "summary": {
+    "sunburst": {
+      "firstPaint": {
+        "samples": 5,
+        "avgMs": 86.09,
+        "minMs": 44.14,
+        "maxMs": 179.24
+      },
+      "ready": {
+        "samples": 5,
+        "avgMs": 95.26,
+        "minMs": 53.69,
+        "maxMs": 192.49
+      }
+    },
+    "scatter": {
+      "firstPaint": {
+        "samples": 5,
+        "avgMs": 59.49,
+        "minMs": 53.06,
+        "maxMs": 70.58
+      },
+      "ready": {
+        "samples": 5,
+        "avgMs": 72.59,
+        "minMs": 61.91,
+        "maxMs": 83.97
+      }
+    }
+  },
+  "status": "PASS"
+}

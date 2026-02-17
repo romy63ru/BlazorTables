@@ -1,0 +1,57 @@
+@page "/scatter-matrix"
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inject TableDataGenerator DataGenerator
+
+<PageTitle>Scatterplot Matrix</PageTitle>
+
+<h1>Brushable Scatterplot Matrix</h1>
+
+<p>D3 brushable scatterplot matrix built from current generated table data. Drag inside any cell to brush points and compare distributions by role.</p>
+
+<div class="scatter-matrix-panel">
+    <div id="scatter-matrix-chart" class="scatter-matrix-chart" aria-label="Brushable scatterplot matrix"></div>
+</div>
+
+@code {
+    private const string ChartSelector = "#scatter-matrix-chart";
+    private bool initialized;
+    private IReadOnlyList<ScatterMatrixPoint> chartData = [];
+
+    protected override void OnInitialized()
+    {
+        chartData = DataGenerator.GetScatterMatrixData();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || initialized)
+        {
+            return;
+        }
+
+        initialized = true;
+        await JS.InvokeVoidAsync("scatterMatrix.render", ChartSelector, chartData);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (!initialized)
+        {
+            return;
+        }
+
+        try
+        {
+            await JS.InvokeVoidAsync("scatterMatrix.dispose", ChartSelector);
+        }
+        catch (JSDisconnectedException)
+        {
+            // Ignore disconnects during navigation or shutdown.
+        }
+        catch (InvalidOperationException)
+        {
+            // Ignore static-render disposal where JS interop is unavailable.
+        }
+    }
+}

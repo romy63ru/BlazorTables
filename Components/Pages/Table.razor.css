@@ -1,0 +1,23 @@
+.expand-btn {
+    min-width: 2rem;
+    padding: 0.05rem 0.45rem;
+    line-height: 1.1;
+}
+
+.nested-grid {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+.nested-grid-level-3 {
+    background-color: #eef3f7;
+}
+
+.nested-table {
+    width: 100%;
+}
+
+.level2-host-row > td,
+.level3-host-row > td {
+    padding: 0 !important;
+}
