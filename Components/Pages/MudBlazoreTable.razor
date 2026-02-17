@@ -7,16 +7,6 @@
 
 <p>Three-level hierarchical MudBlazor DataGrid with the same generated data.</p>
 
-<MudBlazor.MudStack Row="true" AlignItems="MudBlazor.AlignItems.Center" Spacing="2" style="margin-bottom: 12px;">
-    <MudBlazor.MudText Typo="MudBlazor.Typo.body2">Filter status:</MudBlazor.MudText>
-    <MudBlazor.MudSelect T="string" Value="@SelectedStatus" ValueChanged="OnSelectedStatusChanged" Dense="true" Variant="MudBlazor.Variant.Outlined" style="min-width: 180px;">
-        @foreach (var statusOption in StatusFilterOptions)
-        {
-            <MudBlazor.MudSelectItem T="string" Value="@statusOption">@statusOption</MudBlazor.MudSelectItem>
-        }
-    </MudBlazor.MudSelect>
-</MudBlazor.MudStack>
-
 <MudBlazor.MudDataGrid T="TableRow"
                         Items="@Rows"
                         SortMode="MudBlazor.SortMode.Multiple"
@@ -49,7 +39,19 @@
                     <MudBlazor.HierarchyColumn T="TableSubRow" />
                     <MudBlazor.PropertyColumn T="TableSubRow" TProperty="int" Property="x => x.Id" Title="Sub ID" Sortable="true" />
                     <MudBlazor.PropertyColumn T="TableSubRow" TProperty="string" Property="x => x.Component" Title="Component" Sortable="true" />
-                    <MudBlazor.PropertyColumn T="TableSubRow" TProperty="string" Property="x => x.Status" Title="Status" Sortable="true" />
+                    <MudBlazor.TemplateColumn T="TableSubRow" Title="Status" Sortable="true" SortBy="x => x.Status">
+                        <HeaderTemplate>
+                            <MudBlazor.MudSelect T="string" Value="@SelectedStatus" ValueChanged="OnSelectedStatusChanged" Dense="true" Variant="MudBlazor.Variant.Text" style="min-width: 120px;">
+                                @foreach (var statusOption in StatusFilterOptions)
+                                {
+                                    <MudBlazor.MudSelectItem T="string" Value="@statusOption">@statusOption</MudBlazor.MudSelectItem>
+                                }
+                            </MudBlazor.MudSelect>
+                        </HeaderTemplate>
+                        <CellTemplate>
+                            @context.Item.Status
+                        </CellTemplate>
+                    </MudBlazor.TemplateColumn>
                     <MudBlazor.PropertyColumn T="TableSubRow" TProperty="string" Property="x => x.Owner" Title="Owner" Sortable="true" />
                 </Columns>
                 <ChildRowContent Context="childContext">
