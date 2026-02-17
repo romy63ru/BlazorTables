@@ -1,6 +1,7 @@
 using BlazorTables.Components;
 using BlazorTables.Services;
 using Microsoft.AspNetCore.DataProtection;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var dataProtectionKeyPath = Path.Combine(builder.Environment.ContentRootPath, ".aspnet", "DataProtection-Keys");
@@ -10,6 +11,7 @@ Directory.CreateDirectory(dataProtectionKeyPath);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddMudServices();
 builder.Services.AddSingleton<TableDataGenerator>();
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeyPath))

@@ -55,22 +55,22 @@
                         <strong>Sub-rows for @context.Name:</strong>
                         <div class="mt-2">
                             <Microsoft.AspNetCore.Components.QuickGrid.QuickGrid Items="@GetSubRows(parentId).AsQueryable()" Class="table table-sm table-bordered bg-white">
-                                <TemplateColumn Title="" Class="expand-cell">
+                                <TemplateColumn Title="" Class="expand-cell" Context="subRow">
                                     <button class="btn btn-sm btn-outline-secondary"
-                                            @onclick="() => ToggleChildTable(parentId, context.Id)"
+                                            @onclick="() => ToggleChildTable(parentId, subRow.Id)"
                                             @onclick:stopPropagation="true">
-                                        @(IsChildExpanded(parentId, context.Id) ? "−" : "+")
+                                        @(IsChildExpanded(parentId, subRow.Id) ? "−" : "+")
                                     </button>
                                 </TemplateColumn>
                                 <PropertyColumn Property="@(s => s.Id)" Sortable="true" Title="Sub ID" />
                                 <PropertyColumn Property="@(s => s.Component)" Sortable="true" />
                                 <PropertyColumn Property="@(s => s.Status)" Sortable="true" />
                                 <PropertyColumn Property="@(s => s.Owner)" Sortable="true" />
-                                <TemplateColumn Title="">
-                                    @if (IsChildExpanded(parentId, context.Id))
+                                <TemplateColumn Title="" Context="subRow">
+                                    @if (IsChildExpanded(parentId, subRow.Id))
                                     {
-                                        var subRowId = context.Id;
-                                        var componentName = context.Component;
+                                        var subRowId = subRow.Id;
+                                        var componentName = subRow.Component;
                                         <div style="padding-left: 15px; padding-top: 0.5rem; padding-bottom: 0.5rem; background: #e9ecef;">
                                             <strong>Details for @componentName:</strong>
                                             <div class="mt-2">
